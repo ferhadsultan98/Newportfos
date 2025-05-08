@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Management System</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #f44336;
+            --light-gray: #f0f0f0;
+            --dark-gray: #333;
+            --white: #fff;
+            --text-color: #333;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        nav {
+            background-color: var(--primary-color);
+            padding: 10px 0;
+            box-shadow: var(--box-shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        nav ul li {
+            margin: 5px 10px;
+        }
+
+        nav ul li button {
+            background-color: transparent;
+            color: var(--white);
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: var(--border-radius);
+            transition: background-color 0.3s ease;
+        }
+
+        nav ul li button:hover, nav ul li button.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background-color: var(--white);
+            margin-top: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            animation: fadeIn 0.5s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2, h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--light-gray);
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="number"], input[type="tel"], select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+        }
+
+        button, .button {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        button:hover, .button:hover {
+            background-color: #3e8e41;
+        }
+
+        button.secondary, .button.secondary {
+            background-color: var(--secondary-color);
+        }
+        button.secondary:hover, .button.secondary:hover {
+            background-color: #c0392b;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        /* POS Specific Styles */
+        .pos-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .pos-menu, .pos-order {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .pos-menu-categories button {
+            margin-right: 5px;
+            margin-bottom: 10px;
+        }
+
+        .menu-items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .menu-item-card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: box-shadow 0.3s ease;
+        }
+        .menu-item-card:hover {
+            box-shadow: 0 0 8px rgba(0,0,0,0.15);
+        }
+        .menu-item-card p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        .menu-item-card .price {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .order-summary-item input[type="number"] {
+            width: 50px;
+            padding: 5px;
+            margin-left: 10px;
+        }
+        .order-summary-item button {
+            padding: 5px 8px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+
+        /* Pie Chart */
+        .pie-chart-container {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background-image: conic-gradient(
+                var(--primary-color) 0% var(--revenue-percentage),
+                var(--secondary-color) var(--revenue-percentage) 100%
+            );
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .pie-chart-center {
+            width: 100px;
+            height: 100px;
+            background-color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+        .pie-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+        }
+        .legend-color-box {
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+            border-radius: 3px;
+        }
+
+
+        /* QR Menu Specific Styles */
+        .qr-menu-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+        .qr-code-placeholder {
+            flex-basis: 200px;
+            text-align: center;
+        }
+        .qr-code-placeholder img {
+            width: 180px;
+            height: 180px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .digital-menu {
+            flex: 1;
+            max-width: 400px; /* Simulate mobile view */
+            margin: 0 auto;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        .digital-menu h3 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .digital-menu-category {
+            margin-bottom: 15px;
+        }
+        .digital-menu-category h4 {
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .digital-menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+            cursor: pointer;
+        }
+        .digital-menu-item:last-child {
+            border-bottom: none;
+        }
+        .digital-menu-item:hover {
+            background-color: #e9e9e9;
+        }
+        .qr-virtual-order {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+        }
+        .qr-virtual-order h4 {
+            margin-bottom: 10px;
+        }
+        .qr-virtual-order-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            padding: 3px 0;
+        }
+
+        /* Online Order Styles */
+        .online-order-card {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .online-order-card h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .online-order-card p {
+            margin: 5px 0;
+        }
+        .online-order-card.completed {
+            background-color: #e6ffe6;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            .pos-container {
+                flex-direction: column;
+            }
+            .qr-menu-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .digital-menu {
+                width: 100%;
+                max-width: 100%;
+            }
+            .pie-chart-container {
+                width: 150px;
+                height: 150px;
+            }
+            .pie-chart-center {
+                width: 75px;
+                height: 75px;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <ul>
+            <li><button onclick="showTab('pos')">POS System</button></li>
+            <li><button onclick="showTab('cashRegister')">Cash Register</button></li>
+            <li><button onclick="showTab('inventory')">Inventory</button></li>
+            <li><button onclick="showTab('reports')">Financial Reports</button></li>
+            <li><button onclick="showTab('qrMenu')">QR Menu</button></li>
+            <li><button onclick="showTab('onlineOrders')">Online Orders</button></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div id="pos" class="tab-content">
+            <h2>POS System</h2>
+            <div class="pos-container">
+                <div class="pos-menu">
+                    <h3>Menu</h3>
+                    <div class="pos-menu-categories">
+                        </div>
+                    <div class="menu-items-grid">
+                        </div>
+                </div>
+                <div class="pos-order">
+                    <h3>Current Order</h3>
+                    <table id="currentOrderTable">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                    <h3>Total: $<span id="orderTotalAmount">0.00</span></h3>
+                    <button onclick="submitOrder()">Submit Order</button>
+                    <button onclick="clearCurrentOrder()" class="secondary">Clear Order</button>
+
+                    <h3>Sales History (Today)</h3>
+                    <table id="salesHistoryTable">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Items</th>
+                                <th>Total Amount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="cashRegister" class="tab-content">
+            <h2>Cash Register</h2>
+            <h3>Daily Total Sales: $<span id="dailyTotalSales">0.00</span></h3>
+            <div class="form-group">
+                <label for="transactionType">Transaction Type:</label>
+                <select id="transactionType">
+                    <option value="cash_in">Cash In</option>
+                    <option value="cash_out">Cash Out</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="transactionAmount">Amount:</label>
+                <input type="number" id="transactionAmount" placeholder="0.00" step="0.01">
+            </div>
+            <div class="form-group">
+                <label for="transactionDescription">Description:</label>
+                <input type="text" id="transactionDescription" placeholder="e.g., Supplier payment">
+            </div>
+            <button onclick="addCashTransaction()">Add Transaction</button>
+            <button onclick="resetCashRegister()" class="secondary">Reset Cash Register</button>
+
+            <h3>Transaction Log (Today)</h3>
+            <table id="cashTransactionsLog">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+
+        <div id="inventory" class="tab-content">
+            <h2>Inventory Management</h2>
+            <h3>Add New Inventory Item</h3>
+            <div class="form-group">
+                <label for="itemName">Item Name:</label>
+                <input type="text" id="inventoryItemName" placeholder="e.g., Tomatoes">
+            </div>
+            <div class="form-group">
+                <label for="itemQuantity">Quantity:</label>
+                <input type="number" id="inventoryItemQuantity" placeholder="e.g., 100">
+            </div>
+            <div class="form-group">
+                <label for="itemCostPrice">Cost Price (per unit):</label>
+                <input type="number" id="inventoryItemCostPrice" placeholder="e.g., 0.50" step="0.01">
+            </div>
+            <button onclick="addInventoryItem()">Add Item to Inventory</button>
+
+            <h3>Current Stock Levels</h3>
+            <table id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Quantity Remaining</th>
+                        <th>Cost Price</th>
+                        <th>Total Cost Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+
+        <div id="reports" class="tab-content">
+            <h2>Financial Reports</h2>
+             <div class="form-group">
+                <label for="reportDateFilter">Filter by Date:</label>
+                <input type="date" id="reportDateFilter" value=""> <button onclick="generateFinancialReport()">Generate Report</button>
+            </div>
+            <h3>Summary (<span id="reportDateDisplay">Today</span>)</h3>
+            <p>Total Revenue: $<span id="totalRevenue">0.00</span></p>
+            <p>Total Expenses: $<span id="totalExpenses">0.00</span></p>
+            <p><strong>Net Profit: $<span id="netProfit">0.00</span></strong></p>
+
+            <h3>Revenue vs Expenses</h3>
+            <div class="pie-chart-container" id="revenueExpenseChart">
+                <div class="pie-chart-center" id="profitPercentageDisplay">0%</div>
+            </div>
+            <div class="pie-legend">
+                <div class="legend-item">
+                    <div class="legend-color-box" style="background-color: var(--primary-color);"></div> Revenue
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color-box" style="background-color: var(--secondary-color);"></div> Expenses
+                </div>
+            </div>
+        </div>
+
+        <div id="qrMenu" class="tab-content">
+            <h2>QR Menu Display</h2>
+            <div class="qr-menu-container">
+                <div class="qr-code-placeholder">
+                    <h3>Scan to View Menu</h3>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=YOUR_MENU_URL_HERE" alt="QR Code Placeholder">
+                    <p style="font-size: 0.8em;">(This is a dummy QR code. Replace with your actual menu URL or QR generator)</p>
+                </div>
+                <div class="digital-menu">
+                    <h3>Our Menu</h3>
+                    <div id="digitalMenuItems">
+                        </div>
+                    <div class="qr-virtual-order">
+                        <h4>Your Virtual Order</h4>
+                        <div id="qrVirtualOrderSummary">
+                            <p><em>Tap items from the menu to add them here.</em></p>
+                        </div>
+                        <p><strong>Total: $<span id="qrVirtualOrderTotal">0.00</span></strong></p>
+                        <button onclick="clearQrVirtualOrder()">Clear Virtual Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="onlineOrders" class="tab-content">
+            <h2>Online Orders</h2>
+            <h3>Simulate New Online Order</h3>
+            <div class="form-group">
+                <label for="customerName">Customer Name:</label>
+                <input type="text" id="customerName" placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label for="customerPhone">Phone Number:</label>
+                <input type="tel" id="customerPhone" placeholder="555-1234">
+            </div>
+            <div class="form-group">
+                <label for="onlineOrderItems">Select Items (comma-separated names):</label>
+                <input type="text" id="onlineOrderItems" placeholder="e.g., Pizza, Coke">
+                 <small><i>For simulation, enter exact names from inventory. Prices will be looked up.</i></small>
+            </div>
+            <button onclick="submitOnlineOrder()">Submit Online Order</button>
+
+            <h3>Pending Online Orders</h3>
+            <div id="pendingOnlineOrdersContainer">
+                </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Global State & Data ---
+        let menu = {
+            "Drinks": [
+                { id: "d1", name: "Coke", price: 2.50, inventoryItems: [{ name: "Coke Can", qty: 1 }] },
+                { id: "d2", name: "Sprite", price: 2.50, inventoryItems: [{ name: "Sprite Can", qty: 1 }] },
+                { id: "d3", name: "Orange Juice", price: 3.00, inventoryItems: [{ name: "Orange Juice Bottle", qty: 1 }] },
+                { id: "d4", name: "Water", price: 1.50, inventoryItems: [{ name: "Water Bottle", qty: 1 }] },
+            ],
+            "Main Course": [
+                { id: "m1", name: "Pizza Margherita", price: 12.00, inventoryItems: [{ name: "Pizza Dough", qty: 1 }, { name: "Tomato Sauce", qty: 0.2 }, {name: "Cheese", qty: 0.15}] },
+                { id: "m2", name: "Pasta Carbonara", price: 14.50, inventoryItems: [{ name: "Pasta", qty: 0.2 }, { name: "Eggs", qty: 2 }, {name: "Bacon", qty: 0.1}] },
+                { id: "m3", name: "Chicken Burger", price: 10.00, inventoryItems: [{ name: "Burger Bun", qty: 1 }, { name: "Chicken Patty", qty: 1 }, { name: "Lettuce", qty: 0.05 }] },
+            ],
+            "Desserts": [
+                { id: "ds1", name: "Chocolate Cake", price: 6.00, inventoryItems: [{ name: "Cake Slice", qty: 1 }] },
+                { id: "ds2", name: "Ice Cream Scoop", price: 3.50, inventoryItems: [{ name: "Ice Cream", qty: 0.1 }] },
+            ]
+        };
+
+        let inventory = [
+            { name: "Coke Can", quantity: 100, costPrice: 0.80 },
+            { name: "Sprite Can", quantity: 100, costPrice: 0.80 },
+            { name: "Orange Juice Bottle", quantity: 50, costPrice: 1.20 },
+            { name: "Water Bottle", quantity: 150, costPrice: 0.30 },
+            { name: "Pizza Dough", quantity: 50, costPrice: 1.00 },
+            { name: "Tomato Sauce", quantity: 20, costPrice: 2.00 }, // Assuming cost per kg/liter
+            { name: "Cheese", quantity: 10, costPrice: 8.00 }, // Assuming cost per kg
+            { name: "Pasta", quantity: 30, costPrice: 3.00 }, // Assuming cost per kg
+            { name: "Eggs", quantity: 100, costPrice: 0.20 }, // Cost per egg
+            { name: "Bacon", quantity: 5, costPrice: 10.00 }, // Assuming cost per kg
+            { name: "Burger Bun", quantity: 80, costPrice: 0.50 },
+            { name: "Chicken Patty", quantity: 80, costPrice: 1.50 },
+            { name: "Lettuce", quantity: 10, costPrice: 2.00 }, // Assuming cost per kg/head
+            { name: "Cake Slice", quantity: 30, costPrice: 2.00 },
+            { name: "Ice Cream", quantity: 10, costPrice: 5.00 }, // Assuming cost per liter/tub
+        ];
+
+        let currentOrder = []; // { id, name, price, quantity }
+        let salesHistory = []; // { orderId, items: [{name, quantity, price}], totalAmount, date }
+        let dailyTotalSales = 0;
+        let cashTransactions = []; // { date, type, description, amount }
+        let nextOrderId = 1;
+        let nextOnlineOrderId = 1;
+        let onlineOrders = []; // { id, customerName, customerPhone, items: [{name, price (looked up)}], totalAmount, status: 'pending'/'completed' }
+        let qrVirtualOrder = []; // { id, name, price, quantity }
+
+
+        // --- Utility Functions ---
+        function formatDate(date) {
+            return date.toLocaleString();
+        }
+        function getTodayDateString() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+
+        // --- Tab Navigation ---
+        function showTab(tabId) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+
+            const buttons = document.querySelectorAll('nav ul li button');
+            buttons.forEach(button => button.classList.remove('active'));
+            document.querySelector(`nav ul li button[onclick="showTab('${tabId}')"]`).classList.add('active');
+
+            // Refresh data for specific tabs when shown
+            if (tabId === 'inventory') renderInventoryTable();
+            if (tabId === 'reports') {
+                 document.getElementById('reportDateFilter').value = getTodayDateString();
+                 generateFinancialReport();
+            }
+            if (tabId === 'qrMenu') renderDigitalMenu();
+            if (tabId === 'pos') renderPosMenuCategories(); // Initial render
+        }
+
+        // --- POS System ---
+        function renderPosMenuCategories() {
+            const categoriesContainer = document.querySelector('.pos-menu-categories');
+            categoriesContainer.innerHTML = '';
+            Object.keys(menu).forEach(category => {
+                const button = document.createElement('button');
+                button.textContent = category;
+                button.onclick = () => renderMenuItemsForCategory(category);
+                categoriesContainer.appendChild(button);
+            });
+            // Optionally, display items from the first category by default
+            if (Object.keys(menu).length > 0) {
+                renderMenuItemsForCategory(Object.keys(menu)[0]);
+            }
+        }
+
+        function renderMenuItemsForCategory(categoryName) {
+            const itemsGrid = document.querySelector('.menu-items-grid');
+            itemsGrid.innerHTML = '';
+            menu[categoryName].forEach(item => {
+                const card = document.createElement('div');
+                card.classList.add('menu-item-card');
+                card.innerHTML = `
+                    <h4>${item.name}</h4>
+                    <p class="price">$${item.price.toFixed(2)}</p>
+                `;
+                card.onclick = () => addItemToOrder(item);
+                itemsGrid.appendChild(card);
+            });
+        }
+
+        function addItemToOrder(menuItem) {
+            const existingItem = currentOrder.find(item => item.id === menuItem.id);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                currentOrder.push({ ...menuItem, quantity: 1 });
+            }
+            renderCurrentOrderTable();
+        }
+
+        function renderCurrentOrderTable() {
+            const tableBody = document.getElementById('currentOrderTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+            let totalAmount = 0;
+
+            currentOrder.forEach((item, index) => {
+                const row = tableBody.insertRow();
+                row.classList.add('order-summary-item');
+                const itemTotal = item.price * item.quantity;
+                totalAmount += itemTotal;
+
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>
+                        <input type="number" value="${item.quantity}" min="1" onchange="updateOrderItemQuantity(${index}, this.value)">
+                    </td>
+                    <td>$${item.price.toFixed(2)}</td>
+                    <td>$${itemTotal.toFixed(2)}</td>
+                    <td><button onclick="removeOrderItem(${index})" class="secondary">Remove</button></td>
+                `;
+            });
+            document.getElementById('orderTotalAmount').textContent = totalAmount.toFixed(2);
+        }
+
+        function updateOrderItemQuantity(index, newQuantity) {
+            const qty = parseInt(newQuantity);
+            if (qty > 0) {
+                currentOrder[index].quantity = qty;
+            } else {
+                // Remove if quantity is 0 or less
+                currentOrder.splice(index, 1);
+            }
+            renderCurrentOrderTable();
+        }
+
+        function removeOrderItem(index) {
+            currentOrder.splice(index, 1);
+            renderCurrentOrderTable();
+        }
+
+        function clearCurrentOrder() {
+            currentOrder = [];
+            renderCurrentOrderTable();
+        }
+
+        function submitOrder() {
+            if (currentOrder.length === 0) {
+                alert("Cannot submit an empty order.");
+                return;
+            }
+
+            const totalAmount = parseFloat(document.getElementById('orderTotalAmount').textContent);
+            const orderItemsDeepCopy = JSON.parse(JSON.stringify(currentOrder)); // Deep copy
+
+            const order = {
+                orderId: `POS-${nextOrderId++}`,
+                items: orderItemsDeepCopy,
+                totalAmount: totalAmount,
+                date: new Date()
+            };
+            salesHistory.push(order);
+
+            // Update inventory
+            let orderCost = 0;
+            order.items.forEach(orderedItem => {
+                const menuItemDetails = findMenuItemDetails(orderedItem.id);
+                if (menuItemDetails && menuItemDetails.inventoryItems) {
+                    menuItemDetails.inventoryItems.forEach(ing => {
+                        const inventoryItem = inventory.find(inv => inv.name === ing.name);
+                        if (inventoryItem) {
+                            const quantityToDeduct = ing.qty * orderedItem.quantity;
+                            inventoryItem.quantity -= quantityToDeduct;
+                            orderCost += inventoryItem.costPrice * quantityToDeduct;
+                        } else {
+                            console.warn(`Inventory item ${ing.name} for ${orderedItem.name} not found!`);
+                        }
+                    });
+                }
+            });
+            order.cost = orderCost; // Store cost with the order for profit calculation
+
+            // Update daily sales
+            dailyTotalSales += totalAmount;
+            document.getElementById('dailyTotalSales').textContent = dailyTotalSales.toFixed(2);
+
+            // Log cash-in for this sale (optional, could be handled differently)
+            cashTransactions.push({
+                date: new Date(),
+                type: 'sale_income',
+                description: `Order ${order.orderId}`,
+                amount: totalAmount
+            });
+
+
+            renderSalesHistoryTable();
+            renderInventoryTable(); // Refresh inventory display
+            renderCashTransactionsLog(); // Refresh cash log
+            generateFinancialReport(); // Refresh reports
+
+            clearCurrentOrder();
+            alert(`Order ${order.orderId} submitted successfully!`);
+        }
+
+        function findMenuItemDetails(itemId) {
+            for (const category in menu) {
+                const item = menu[category].find(i => i.id === itemId);
+                if (item) return item;
+            }
+            return null;
+        }
+
+
+        function renderSalesHistoryTable() {
+            const tableBody = document.getElementById('salesHistoryTable').querySelector('tbody');
+            tableBody.innerHTML = ''; // Clear existing rows
+            // Display in reverse chronological order (newest first)
+            [...salesHistory].reverse().forEach(order => {
+                const row = tableBody.insertRow();
+                const itemNames = order.items.map(item => `${item.name} (x${item.quantity})`).join(', ');
+                row.innerHTML = `
+                    <td>${order.orderId}</td>
+                    <td>${itemNames}</td>
+                    <td>$${order.totalAmount.toFixed(2)}</td>
+                    <td>${formatDate(order.date)}</td>
+                `;
+            });
+        }
+
+
+        // --- Cash Register ---
+        function addCashTransaction() {
+            const type = document.getElementById('transactionType').value;
+            const amount = parseFloat(document.getElementById('transactionAmount').value);
+            const description = document.getElementById('transactionDescription').value;
+
+            if (isNaN(amount) || amount <= 0) {
+                alert("Please enter a valid amount.");
+                return;
+            }
+            if (!description.trim()) {
+                alert("Please enter a description for the transaction.");
+                return;
+            }
+
+            cashTransactions.push({
+                date: new Date(),
+                type: type,
+                description: description,
+                amount: amount
+            });
+
+            renderCashTransactionsLog();
+            generateFinancialReport(); // Update financial report
+
+            document.getElementById('transactionAmount').value = '';
+            document.getElementById('transactionDescription').value = '';
+        }
+
+        function renderCashTransactionsLog() {
+            const tableBody = document.getElementById('cashTransactionsLog').querySelector('tbody');
+            tableBody.innerHTML = '';
+            [...cashTransactions].reverse().forEach(tx => {
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td>${formatDate(tx.date)}</td>
+                    <td>${tx.type.replace('_', ' ').toUpperCase()}</td>
+                    <td>${tx.description}</td>
+                    <td style="color: ${tx.type === 'cash_out' || tx.type === 'expense' ? 'var(--secondary-color)' : 'var(--primary-color)'};">
+                        ${tx.type === 'cash_out' || tx.type === 'expense' ? '-' : '+'}$${tx.amount.toFixed(2)}
+                    </td>
+                `;
+            });
+        }
+
+        function resetCashRegister() {
+            if (confirm("Are you sure you want to reset the cash register? This will clear daily sales and transaction logs for the current session.")) {
+                dailyTotalSales = 0;
+                cashTransactions = []; // Note: Sales history is kept separate.
+                nextOrderId = 1; // Reset order ID for the day if needed, or keep global.
+
+                document.getElementById('dailyTotalSales').textContent = "0.00";
+                renderCashTransactionsLog();
+                renderSalesHistoryTable(); // Clear sales table IF it's meant to be daily
+                generateFinancialReport();
+                alert("Cash register reset for the current session.");
+            }
+        }
+
+        // --- Inventory Management ---
+        function addInventoryItem() {
+            const name = document.getElementById('inventoryItemName').value.trim();
+            const quantity = parseInt(document.getElementById('inventoryItemQuantity').value);
+            const costPrice = parseFloat(document.getElementById('inventoryItemCostPrice').value);
+
+            if (!name || isNaN(quantity) || quantity < 0 || isNaN(costPrice) || costPrice < 0) {
+                alert("Please fill all fields correctly.");
+                return;
+            }
+
+            const existingItem = inventory.find(item => item.name.toLowerCase() === name.toLowerCase());
+            if (existingItem) {
+                existingItem.quantity += quantity;
+                // Optionally update cost price if needed (e.g., weighted average)
+                existingItem.costPrice = costPrice; // Simple update for now
+            } else {
+                inventory.push({ name, quantity, costPrice });
+            }
+
+            renderInventoryTable();
+            document.getElementById('inventoryItemName').value = '';
+            document.getElementById('inventoryItemQuantity').value = '';
+            document.getElementById('inventoryItemCostPrice').value = '';
+        }
+
+        function renderInventoryTable() {
+            const tableBody = document.getElementById('inventoryTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+            inventory.forEach(item => {
+                const row = tableBody.insertRow();
+                const totalValue = item.quantity * item.costPrice;
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.quantity}</td>
+                    <td>$${item.costPrice.toFixed(2)}</td>
+                    <td>$${totalValue.toFixed(2)}</td>
+                `;
+            });
+        }
+
+        // --- Financial Reports ---
+        function generateFinancialReport() {
+            const filterDateStr = document.getElementById('reportDateFilter').value;
+            const reportDateDisplay = document.getElementById('reportDateDisplay');
+
+            let currentDaySales = salesHistory;
+            let currentDayCashTransactions = cashTransactions;
+
+            if (filterDateStr) {
+                reportDateDisplay.textContent = new Date(filterDateStr + 'T00:00:00').toLocaleDateString(); // Display selected date
+                // Filter sales and transactions for the selected date
+                // Note: This is a simple string comparison for date part.
+                // For robust date filtering, use Date objects and compare year, month, day.
+                currentDaySales = salesHistory.filter(sale => sale.date.toISOString().startsWith(filterDateStr));
+                currentDayCashTransactions = cashTransactions.filter(tx => tx.date.toISOString().startsWith(filterDateStr));
+            } else {
+                reportDateDisplay.textContent = "All Time (Current Session)";
+            }
+
+
+            const totalRevenue = currentDaySales.reduce((sum, order) => sum + order.totalAmount, 0);
+
+            // Expenses: Cost of goods sold (from sales) + manual cash_out transactions
+            const costOfGoodsSold = currentDaySales.reduce((sum, order) => sum + (order.cost || 0), 0);
+            const manualExpenses = currentDayCashTransactions
+                .filter(tx => tx.type === 'cash_out')
+                .reduce((sum, tx) => sum + tx.amount, 0);
+            const totalExpenses = costOfGoodsSold + manualExpenses;
+
+            const netProfit = totalRevenue - totalExpenses;
+
+            document.getElementById('totalRevenue').textContent = totalRevenue.toFixed(2);
+            document.getElementById('totalExpenses').textContent = totalExpenses.toFixed(2);
+            document.getElementById('netProfit').textContent = netProfit.toFixed(2);
+
+            // Update Pie Chart
+            const chart = document.getElementById('revenueExpenseChart');
+            const profitPercentageDisplay = document.getElementById('profitPercentageDisplay');
+            let revenuePercentage = 0;
+            if (totalRevenue + totalExpenses > 0) { // Avoid division by zero if both are 0
+                 revenuePercentage = (totalRevenue / (totalRevenue + totalExpenses)) * 100;
+                 if (totalRevenue === 0 && totalExpenses > 0) revenuePercentage = 0;
+                 if (totalRevenue > 0 && totalExpenses === 0) revenuePercentage = 100;
+            }
+
+
+            chart.style.setProperty('--revenue-percentage', `${revenuePercentage.toFixed(1)}%`);
+
+            if (totalRevenue === 0 && totalExpenses === 0) {
+                 profitPercentageDisplay.textContent = "N/A";
+            } else {
+                 let overallProfitPercentage = 0;
+                 if (totalRevenue > 0) {
+                    overallProfitPercentage = (netProfit / totalRevenue) * 100;
+                 } else if (netProfit < 0) { // Only expenses
+                    overallProfitPercentage = -100; // Indicates loss relative to no revenue
+                 }
+                 profitPercentageDisplay.textContent = `${overallProfitPercentage.toFixed(0)}% Profit`;
+            }
+        }
+
+
+        // --- QR Menu Display ---
+        function renderDigitalMenu() {
+            const menuContainer = document.getElementById('digitalMenuItems');
+            menuContainer.innerHTML = ''; // Clear previous items
+
+            Object.keys(menu).forEach(categoryName => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.classList.add('digital-menu-category');
+                categoryDiv.innerHTML = `<h4>${categoryName}</h4>`;
+
+                menu[categoryName].forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.classList.add('digital-menu-item');
+                    itemDiv.innerHTML = `
+                        <span>${item.name}</span>
+                        <span class="price">$${item.price.toFixed(2)}</span>
+                    `;
+                    itemDiv.onclick = () => addItemToQrVirtualOrder(item);
+                    categoryDiv.appendChild(itemDiv);
+                });
+                menuContainer.appendChild(categoryDiv);
+            });
+            renderQrVirtualOrderSummary(); // Ensure summary is also updated/cleared
+        }
+
+        function addItemToQrVirtualOrder(menuItem) {
+            const existingItem = qrVirtualOrder.find(item => item.id === menuItem.id);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                qrVirtualOrder.push({ ...menuItem, quantity: 1 });
+            }
+            renderQrVirtualOrderSummary();
+        }
+
+        function renderQrVirtualOrderSummary() {
+            const summaryDiv = document.getElementById('qrVirtualOrderSummary');
+            const totalSpan = document.getElementById('qrVirtualOrderTotal');
+            summaryDiv.innerHTML = '';
+            let total = 0;
+
+            if (qrVirtualOrder.length === 0) {
+                summaryDiv.innerHTML = "<p><em>Tap items from the menu to add them here.</em></p>";
+                totalSpan.textContent = "0.00";
+                return;
+            }
+
+            qrVirtualOrder.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.classList.add('qr-virtual-order-item');
+                itemDiv.textContent = `${item.name} (x${item.quantity}) - $${(item.price * item.quantity).toFixed(2)}`;
+                summaryDiv.appendChild(itemDiv);
+                total += item.price * item.quantity;
+            });
+            totalSpan.textContent = total.toFixed(2);
+        }
+
+        function clearQrVirtualOrder() {
+            qrVirtualOrder = [];
+            renderQrVirtualOrderSummary();
+        }
+
+
+        // --- Online Order Simulation ---
+        function submitOnlineOrder() {
+            const customerName = document.getElementById('customerName').value.trim();
+            const customerPhone = document.getElementById('customerPhone').value.trim();
+            const itemsString = document.getElementById('onlineOrderItems').value.trim();
+
+            if (!customerName || !customerPhone || !itemsString) {
+                alert("Please fill all fields for the online order.");
+                return;
+            }
+
+            const itemNames = itemsString.split(',').map(name => name.trim().toLowerCase());
+            const orderItems = [];
+            let orderTotal = 0;
+            let orderCost = 0;
+
+            itemNames.forEach(itemName => {
+                let foundItem = null;
+                for (const category in menu) {
+                    const item = menu[category].find(m => m.name.toLowerCase() === itemName);
+                    if (item) {
+                        foundItem = item;
+                        break;
+                    }
+                }
+
+                if (foundItem) {
+                    // For simplicity, assume quantity 1 for each item entered
+                    const existing = orderItems.find(oi => oi.id === foundItem.id);
+                    if(existing) {
+                        existing.quantity++;
+                    } else {
+                        orderItems.push({ id: foundItem.id, name: foundItem.name, price: foundItem.price, quantity: 1 });
+                    }
+                    orderTotal += foundItem.price;
+
+                    // Calculate cost for this item
+                    if (foundItem.inventoryItems) {
+                        foundItem.inventoryItems.forEach(ing => {
+                            const inventoryItem = inventory.find(inv => inv.name === ing.name);
+                            if (inventoryItem) {
+                                orderCost += inventoryItem.costPrice * ing.qty; // Assuming ing.qty is for 1 menu item
+                            }
+                        });
+                    }
+
+                } else {
+                    alert(`Item "${itemName}" not found in the menu. Please check spelling.`);
+                    // Do not proceed with order if an item is not found
+                    orderItems.length = 0; // Clear partially built order items
+                    return;
+                }
+            });
+
+             if (orderItems.length === 0 && itemNames.length > 0) { // check if any item was actually added
+                alert("No valid items found for the order.");
+                return;
+            }
+
+
+            const newOnlineOrder = {
+                id: `ONL-${nextOnlineOrderId++}`,
+                customerName,
+                customerPhone,
+                items: orderItems,
+                totalAmount: orderTotal,
+                cost: orderCost,
+                status: 'pending', // 'pending', 'completed'
+                date: new Date()
+            };
+            onlineOrders.push(newOnlineOrder);
+
+            // Deduct inventory for online orders
+            newOnlineOrder.items.forEach(orderedItem => {
+                const menuItemDetails = findMenuItemDetails(orderedItem.id);
+                if (menuItemDetails && menuItemDetails.inventoryItems) {
+                    menuItemDetails.inventoryItems.forEach(ing => {
+                        const inventoryItem = inventory.find(inv => inv.name === ing.name);
+                        if (inventoryItem) {
+                            inventoryItem.quantity -= (ing.qty * orderedItem.quantity);
+                        }
+                    });
+                }
+            });
+
+
+            renderOnlineOrders();
+            renderInventoryTable(); // Update inventory table
+            // Clear form
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerPhone').value = '';
+            document.getElementById('onlineOrderItems').value = '';
+            alert(`Online order ${newOnlineOrder.id} received!`);
+        }
+
+        function renderOnlineOrders() {
+            const container = document.getElementById('pendingOnlineOrdersContainer');
+            container.innerHTML = '';
+
+            const pendingOrders = onlineOrders.filter(order => order.status === 'pending');
+            const completedOrders = onlineOrders.filter(order => order.status === 'completed');
+
+
+            if (pendingOrders.length === 0 && completedOrders.length === 0) {
+                container.innerHTML = "<p>No online orders yet.</p>";
+                return;
+            }
+
+            if (pendingOrders.length > 0) {
+                const pendingHeader = document.createElement('h3');
+                pendingHeader.textContent = "Pending Orders";
+                container.appendChild(pendingHeader);
+                pendingOrders.forEach(order => container.appendChild(createOnlineOrderCard(order)));
+            }
+
+            if (completedOrders.length > 0) {
+                const completedHeader = document.createElement('h3');
+                completedHeader.textContent = "Completed Orders";
+                container.appendChild(completedHeader);
+                completedOrders.forEach(order => container.appendChild(createOnlineOrderCard(order)));
+            }
+        }
+
+        function createOnlineOrderCard(order) {
+            const card = document.createElement('div');
+            card.classList.add('online-order-card');
+            if (order.status === 'completed') {
+                card.classList.add('completed');
+            }
+
+            let itemsHtml = '<ul>';
+            order.items.forEach(item => {
+                itemsHtml += `<li>${item.name} (x${item.quantity}) - $${(item.price * item.quantity).toFixed(2)}</li>`;
+            });
+            itemsHtml += '</ul>';
+
+            card.innerHTML = `
+                <h4>Order ID: ${order.id} (${order.status})</h4>
+                <p><strong>Customer:</strong> ${order.customerName}</p>
+                <p><strong>Phone:</strong> ${order.customerPhone}</p>
+                <p><strong>Items:</strong></p>
+                ${itemsHtml}
+                <p><strong>Total:</strong> $${order.totalAmount.toFixed(2)}</p>
+                <p><em>Received: ${formatDate(order.date)}</em></p>
+            `;
+
+            if (order.status === 'pending') {
+                const completeButton = document.createElement('button');
+                completeButton.textContent = 'Mark as Completed';
+                completeButton.onclick = () => markOnlineOrderCompleted(order.id);
+                card.appendChild(completeButton);
+            }
+            return card;
+        }
+
+        function markOnlineOrderCompleted(orderId) {
+            const order = onlineOrders.find(o => o.id === orderId);
+            if (order) {
+                order.status = 'completed';
+
+                // Add to sales history and daily totals, etc. (similar to POS submit)
+                salesHistory.push({
+                    orderId: order.id, // Use online order ID
+                    items: order.items, // Already has name, price, quantity
+                    totalAmount: order.totalAmount,
+                    date: order.date, // Use original order date or new completion date
+                    cost: order.cost || 0 // Use pre-calculated cost
+                });
+
+                dailyTotalSales += order.totalAmount;
+                document.getElementById('dailyTotalSales').textContent = dailyTotalSales.toFixed(2);
+
+                cashTransactions.push({
+                    date: new Date(), // Completion date
+                    type: 'sale_income', // or 'online_sale_income'
+                    description: `Online Order ${order.id}`,
+                    amount: order.totalAmount
+                });
+
+                renderSalesHistoryTable();
+                renderCashTransactionsLog();
+                generateFinancialReport();
+                renderOnlineOrders(); // Re-render to move it or change appearance
+            }
+        }
+
+        // --- Initial Setup ---
+        window.onload = () => {
+            showTab('pos'); // Show POS tab by default
+            renderPosMenuCategories();
+            renderInventoryTable();
+            renderCashTransactionsLog();
+            renderSalesHistoryTable();
+            document.getElementById('reportDateFilter').value = getTodayDateString();
+            generateFinancialReport();
+            renderDigitalMenu();
+            renderOnlineOrders();
+        };
+
+    </script>
+</body>
+</html>
